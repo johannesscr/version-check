@@ -1,0 +1,23 @@
+name: 'Version Check for Changelog and Tags'
+description: 'Check if the changelog version is greater than the latest tag'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Checkout Code'
+      uses: actions/checkout@v3
+      with:
+          fetch-depth: 0 # ensure we also fetch the tags
+    - name: 'Check Version'
+      run: |
+        # Get the latest tag
+        latest_tag=$(git tag | tail -n 1 | cut -d 'v' -f 2) 
+        echo "latest tag = $latest_tag"
+        # get the changelog version
+        changelog_version=$(grep '## \[' CHANGELOG.md | cut -d '[' -f 2 | cut -d ']' -f 1 | head -n 2 | tail -n 1)
+        # Get the latest tag
+        echo "changelog = $changelog_version"
+        # check if the changelog version is greater than the latest tag
+        # simple string comparison
+        [[ "$changelog_version" > "$latest_tag" ]] || (echo "changelog = $changelog_version not greater latest tag = $latest_tag" && exit 1)
+      shell: bash
+
